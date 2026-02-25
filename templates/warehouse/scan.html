@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex justify-content-end mb-3">
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'warehouse_movements' %}" style="text-decoration:none;">
+    <h2 class="mb-0">Stock Movement</h2>
+  </a>
+</div>
+
+  <div class="row align-items-stretch">
+    <!-- LEFT: STOCK MOVEMENT FORM -->
+    <div class="col-md-4">
+
+      <div class="text-center">
+        {% if product.images %}
+          <figure style="margin:0;">
+            <a href="{% url 'warehouse_product_detail' product.sku %}">
+              <img src="{{ product.images.url }}" alt="{{ product.product_name }}"
+                   style="width: 200px; height: 200px; object-fit: cover; border-radius: 6px;">
+            </a>
+          </figure>
+        {% else %}
+          <span class="text-muted">No Image</span>
+        {% endif %}
+      </div>
+
+      <div class="mt-3">
+        <p><b>SKU:</b> {{ product.sku }}</p>
+        <p><b>Product Name:</b> {{ product.product_name }}</p>
+
+        {% if product.stock > 0 %}
+          <p class="text-success"><b>Current Stock:</b> {{ product.stock }}</p>
+        {% else %}
+          <p class="text-danger font-weight-bold"><b>Current Stock:</b> Out of stock</p>
+        {% endif %}
+
+        <p><b>Current Unit Price:</b> MMK {{ product.price|intcomma }}</p>
+
+        {% if error %}
+          <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+      </div>
+
+      <form method="post" class="card p-3 mt-3">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label>Action</label>
+          <select name="action" class="form-control" required>
+            <option value="IN" {% if form_values.action == "IN" %}selected{% endif %}>Supplier Requisition (IN)</option>
+            <option value="OUT" {% if form_values.action == "OUT" %}selected{% endif %}>Customer Requisition (OUT)</option>
+          </select>
+        </div>
+
+        <div class="form-group mt-2">
+          <label>Quantity</label>
+          <input type="number" name="quantity" class="form-control" min="1" required value="{{ form_values.quantity }}">
+        </div>
+
+        <div class="form-group mt-2">
+          <label>Ref Type</label>
+          <select name="ref_type" id="refTypeSelect" class="form-control">
+            <option value="">---------</option>
+            {% for code, name in ref_type_choices %}
+              <option value="{{ code }}"
+                data-actions="{% if code == 'SUP_INV' or code == 'SUP_REQ' %}IN{% elif code == 'CUS_INV' or code == 'CUS_REQ' %}OUT{% else %}IN,OUT{% endif %}"
+                {% if form_values.ref_type == code %}selected{% endif %}>
+                {{ name }}
+              </option>
+            {% endfor %}
+          </select>
+          <small class="text-muted">Choose the document type that caused this stock movement.</small>
+        </div>
+
+        <!-- javaScript -->
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const actionSelect = document.querySelector('select[name="action"]');
+            const refTypeSelect = document.getElementById('refTypeSelect');
+            if (!actionSelect || !refTypeSelect) return;
+
+            const placeholder = refTypeSelect.querySelector('option[value=""]');
+            const allOptions = Array.from(refTypeSelect.querySelectorAll('option'))
+              .filter(opt => opt.value !== '');
+
+            function rebuildRefTypes() {
+              const action = actionSelect.value;
+              const currentValue = refTypeSelect.value;
+
+              refTypeSelect.innerHTML = '';
+              if (placeholder) {
+                refTypeSelect.appendChild(placeholder);
+              } else {
+                const ph = document.createElement('option');
+                ph.value = '';
+                ph.textContent = '---------';
+                refTypeSelect.appendChild(ph);
+              }
+
+              let stillValid = false;
+              allOptions.forEach(opt => {
+                const allowed = (opt.dataset.actions || '').split(',').map(s => s.trim());
+                if (allowed.includes(action)) {
+                  const clone = opt.cloneNode(true);
+                  if (clone.value === currentValue) {
+                    clone.selected = true;
+                    stillValid = true;
+                  }
+                  refTypeSelect.appendChild(clone);
+                }
+              });
+
+              if (!stillValid) {
+                refTypeSelect.value = '';
+              }
+            }
+
+            actionSelect.addEventListener('change', rebuildRefTypes);
+            rebuildRefTypes();
+          });
+        </script>
+        <!-- end js -->
+
+        <div class="form-group mt-2">
+          <label>Ref No</label>
+          <input type="text" name="ref_no" class="form-control"
+                 placeholder="Invoice/Requisition number" value="{{ form_values.ref_no }}">
+        </div>
+
+        <div class="form-group mt-2">
+          <label>Remark</label>
+          <textarea name="remark" class="form-control" rows="2"
+                    placeholder="Optional note...">{{ form_values.remark }}</textarea>
+        </div>
+
+        <button class="btn btn-primary mt-3" type="submit">Submit</button>
+      </form>
+
+    </div>
+
+    <!-- RIGHT: MOVEMENT RECORD TABLE -->
+    <!-- RIGHT: MOVEMENT RECORD TABLE -->
+<div class="col-md-8 mt-5 d-flex">
+  <div class="card w-100 d-flex flex-column">
+
+  <div class="card-body d-flex flex-column">
+
+    <!-- Header + Record Count -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h4 class="mb-0">Records</h4>
+      <span class="badge badge-primary">Total: {{ movements.paginator.count }}</span>
+    </div>
+
+    <!-- Summary Totals -->
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <div class="p-2 border rounded text-center">
+          <small class="text-muted">Total IN</small><br>
+          <b class="text-success">{{ total_in }}</b>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-2 border rounded text-center">
+          <small class="text-muted">Total OUT</small><br>
+          <b class="text-danger">{{ total_out }}</b>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-2 border rounded text-center">
+          <small class="text-muted">Net</small><br>
+          {% if net_total > 0 %}
+            <b class="text-success">+{{ net_total }}</b>
+          {% elif net_total < 0 %}
+            <b class="text-danger">{{ net_total }}</b>
+          {% else %}
+            <b class="text-muted">0</b>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% if rows %}
+      <!-- Scroll area takes remaining height -->
+      <div class="flex-grow-1" style="overflow-y:auto; border:1px solid #dee2e6; border-radius:6px;">
+        <!-- <style>
+          .remark-col {
+              white-space: normal !important;   /* allow wrapping */
+              word-break: break-word;           /* break long words */
+              max-width: 200px;                 /* control column width */
+          }
+          </style> -->
+        <table class="table table-bordered table-sm mb-0" style="table-layout: fixed;">
+          <colgroup>
+            <col style="width: 140px;">   <!-- Created At -->
+            <col style="width: 80px;">    <!-- Type -->
+            <col style="width: 70px;">    <!-- Qty -->
+            <col style="width: 110px;">   <!-- Unit Price -->
+            <col style="width: 160px;">   <!-- Ref Type -->
+            <col style="width: 110px;">   <!-- Ref No -->
+            <col style="width: 150px;">   <!-- Remark -->
+            <col style="width: 130px;">   <!-- Balance -->
+          </colgroup>
+          <thead style="position: sticky; top: 0; background: #f8f9fa; z-index: 5;">
+            <tr>
+              <th>Created At</th>
+              <th>Type</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Ref Type</th>
+              <th>Ref No</th>
+              <th class="remark-col">Remark</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+              {% with m=r.obj %}
+              <tr class="{% if m.movement_type == 'IN' %}table-success{% else %}table-danger{% endif %}">
+                <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
+
+                <td>
+                  {% if m.movement_type == 'IN' %}
+                    <span class="badge badge-success">IN</span>
+                  {% else %}
+                    <span class="badge badge-danger">OUT</span>
+                  {% endif %}
+                </td>
+
+                <td>{{ m.quantity }}</td>
+                <td>MMK {{ m.unit_price|intcomma }}</td>
+                <td>{{ m.get_ref_type_display|default:"-" }}</td>
+                <td>{{ m.ref_no|default:"-" }}</td>
+                <td class="remark-col">{{ m.remark|default:"-" }}</td>
+
+                <td>
+                  <small class="text-muted">before:</small> {{ r.balance_before }}
+                  <br>
+                  <small class="text-muted">after:</small> <b>{{ r.balance_after }}</b>
+                </td>
+              </tr>
+              {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if movements.has_other_pages %}
+        <nav class="mt-3">
+          <ul class="pagination justify-content-center mb-0">
+            {% if movements.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ movements.previous_page_number }}">Previous</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {% for num in movements.paginator.page_range %}
+              {% if movements.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+              {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if movements.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ movements.next_page_number }}">Next</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <p class="text-muted mb-0">No movement records yet.</p>
+    {% endif %}
+
+  </div>
+</div>
+  
+
+</div>
+{% endblock %}

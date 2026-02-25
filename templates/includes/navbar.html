@@ -1,0 +1,149 @@
+{% load static i18n %}
+
+<header class="section-header">
+
+  <!-- ========================= TOP NAV ========================= -->
+  <nav class="navbar mt-1 p-md-0 navbar-expand-sm navbar-light border-bottom">
+    <div class="container">
+
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop4"
+              aria-controls="navbarTop4" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarTop4">
+
+        <!-- LEFT -->
+        <ul class="navbar-nav mr-auto">
+
+          <!-- LANGUAGE SWITCHER -->
+          <li class="nav-item">
+            <form action="{% url 'set_language' %}" method="post" class="form-inline">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+              {% get_current_language as CURRENT_LANGUAGE %}
+              {% get_available_languages as LANGUAGES %}
+
+              <select name="language"
+                      class="custom-select custom-select-sm border-0"
+                      onchange="this.form.submit()">
+                {% for lang_code, lang_name in LANGUAGES %}
+                  <option value="{{ lang_code }}"
+                          {% if lang_code == CURRENT_LANGUAGE %}selected{% endif %}>
+                    {{ lang_name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </form>
+          </li>
+
+        </ul>
+       
+        <!-- RIGHT -->
+        <ul class="navbar-nav">
+          <li>
+            <a href="#" class="nav-link">
+              <i class="fa fa-envelope"></i> {% trans "Email" %}
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link">
+              <i class="fa fa-phone"></i> {% trans "Call us" %}
+            </a>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========================= MAIN HEADER ========================= -->
+  <section class="header-main border-bottom py-2">
+    <div class="container">
+      <div class="row align-items-center g-2">
+
+        <!-- LOGO -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <a href="{% url 'home' %}" class="brand-wrap d-inline-flex align-items-center">
+            <img class="img-fluid" src="{% static 'images/chuebusiness_logo.png' %}" alt="Logo" style="max-width:120px;">
+          </a>
+        </div>
+
+        <!-- CATEGORY + STORE (stack on mobile) -->
+        <div class="col-6 col-md-3 col-lg-3 d-flex justify-content-end justify-content-md-start gap-2">
+          <div class="dropdown">
+            <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
+              <i class="fa fa-bars me-1"></i> {% trans "All category" %}
+            </button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="{% url 'store' %}">{% trans "All Products" %}</a>
+              {% for category in links %}
+                <a class="dropdown-item" href="{{ category.get_url }}">{{ category.category_name }}</a>
+              {% endfor %}
+            </div>
+          </div>
+
+          <a href="{% url 'store' %}" class="btn btn-outline-primary btn-sm">
+            {% trans "Store" %}
+          </a>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="col-12 col-md-6 col-lg-4 order-3 order-lg-2">
+          <form action="{% url 'search' %}" class="w-100" method="GET">
+            <div class="input-group">
+              <input type="text"
+                     class="form-control"
+                     placeholder="{% trans 'Search' %}"
+                     name="keyword"
+                     aria-label="{% trans 'Search' %}">
+              <button class="btn btn-primary" type="submit" aria-label="{% trans 'Search' %}">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- USER + CART -->
+        <div class="col-12 col-lg-3 order-2 order-lg-3">
+          <div class="d-flex justify-content-between justify-content-lg-end align-items-center gap-3 flex-wrap">
+
+            <div class="widget-header">
+              {% if user.id is None %}
+                <small class="title text-muted d-block">{% trans "Welcome guest!" %}</small>
+                <div class="small">
+                  <a href="{% url 'login' %}">{% trans "Sign in" %}</a>
+                  <span class="text-muted"> | </span>
+                  <a href="{% url 'register' %}">{% trans "Register" %}</a>
+                </div>
+              {% else %}
+                <small class="title text-muted d-block">
+                  {% blocktrans with name=user.first_name %}Welcome {{ name }}!{% endblocktrans %}
+                </small>
+                <div class="small">
+                  <a href="{% url 'warehouse_dashboard' %}">{% trans "Warehouse" %}</a>
+                  <span class="text-muted"> | </span>
+                  <a href="{% url 'logout' %}">{% trans "Logout" %}</a>
+                </div>
+              {% endif %}
+            </div>
+
+            <a href="#" class="position-relative text-decoration-none">
+              <span class="d-inline-flex align-items-center justify-content-center rounded-circle border"
+                    style="width:38px;height:38px;">
+                <i class="fa fa-shopping-cart"></i>
+              </span>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ cart_count }}
+              </span>
+            </a>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</header>

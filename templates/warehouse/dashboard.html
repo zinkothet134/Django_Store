@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Warehouse Dashboard</h2>
+    <a href="{% url 'warehouse_products' %}" class="btn btn-primary">View Products</a>
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h5>Total Products</h5>
+        <p class="display-6 mb-0">{{ total_products }}</p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h5>Total Stock</h5>
+        <p class="display-6 mb-0">{{ total_stock|intcomma }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Date range (affects both charts) -->
+  <form method="get" class="card p-3 mt-4">
+    <div class="row align-items-end">
+      <div class="col-md-3">
+        <label class="mb-1">Start date</label>
+        <input type="date" name="start" class="form-control" value="{{ start }}">
+      </div>
+      <div class="col-md-3">
+        <label class="mb-1">End date</label>
+        <input type="date" name="end" class="form-control" value="{{ end }}">
+      </div>
+      <div class="col-md-6 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Apply</button>
+        <a class="btn btn-outline-secondary" href="{% url 'warehouse_dashboard' %}">Default (Last 15 Days)</a>
+      </div>
+    </div>
+    <small class="text-muted d-block mt-2">
+      Default shows last 15 days. Use date range to review daily, weekly, monthly periods.
+    </small>
+  </form>
+
+  <div class="row mt-4 g-3">
+    <!-- Horizontal Bar Chart -->
+    <div class="col-md-5">
+      <div class="card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0">Top OUT Products (Qty)</h5>
+          <small class="text-muted">{{ start }} → {{ end }}</small>
+        </div>
+        <div style="height: 320px;">
+          <canvas id="barOutProducts"></canvas>
+        </div>
+        {% if not bar_labels %}
+          <p class="text-muted mt-3 mb-0">No OUT records in this date range.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Line Chart -->
+    <div class="col-md-7">
+      <div class="card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0">Daily OUT Qty & Income</h5>
+          <small class="text-muted">{{ start }} → {{ end }}</small>
+        </div>
+        <div style="height: 320px;">
+          <canvas id="lineDailyOut"></canvas>
+        </div>
+        {% if not line_labels %}
+          <p class="text-muted mt-3 mb-0">No OUT records in this date range.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center p-3">
+    <a href="{% url 'warehouse_products' %}" class="btn btn-primary mt-3">View Products</a>
+  </div>
+
+</div>
+
+<!-- Chart.js (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const barLabels = {{ bar_labels|safe }};
+  const barQty = {{ bar_qty|safe }};
+
+  const lineLabels = {{ line_labels|safe }};
+  const lineQty = {{ line_qty|safe }};
+  const lineIncome = {{ line_income|safe }};
+
+  if (document.getElementById('barOutProducts')) {
+    new Chart(document.getElementById('barOutProducts'), {
+      type: 'bar',
+      data: {
+        labels: barLabels,
+        datasets: [{
+          label: 'OUT Qty',
+          data: barQty,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: true } },
+        scales: { x: { beginAtZero: true } }
+      }
+    });
+  }
+
+  if (document.getElementById('lineDailyOut')) {
+    new Chart(document.getElementById('lineDailyOut'), {
+      type: 'line',
+      data: {
+        labels: lineLabels,
+        datasets: [
+          { label: 'OUT Qty', data: lineQty, yAxisID: 'yQty', tension: 0.25 },
+          { label: 'Income (MMK)', data: lineIncome, yAxisID: 'yIncome', tension: 0.25 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: true } },
+        scales: {
+          yQty: { beginAtZero: true, position: 'left', title: { display: true, text: 'Qty' } },
+          yIncome: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'MMK' } }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

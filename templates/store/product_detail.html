@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+{% block content %}
+
+<section class="section-content padding-y bg">
+  <div class="container">
+
+    <div class="card">
+      <div class="row no-gutters">
+
+        <!-- LEFT: Image -->
+        <aside class="col-md-6">
+          <article class="gallery-wrap p-3">
+            <div class="img-big-wrap text-center">
+              {% if single_product.images %}
+                <img src="{{ single_product.images.url }}"
+                     alt="{{ single_product.product_name }}"
+                     class="img-fluid rounded"
+                     style="max-height:450px; object-fit:cover;">
+              {% else %}
+                <img src="{% static 'images/no-image.png' %}"
+                     alt="No image"
+                     class="img-fluid rounded"
+                     style="max-height:450px; object-fit:cover;">
+              {% endif %}
+            </div>
+          </article>
+        </aside>
+
+        <!-- RIGHT: Product Info -->
+        <main class="col-md-6 border-left">
+          <form action="" method="POST" class="p-4">
+            {% csrf_token %}
+
+            <h2 class="title mb-2">{{ single_product.product_name }}</h2>
+
+            <div class="mb-3">
+              <span class="h4 text-primary">MMK {{ single_product.price|intcomma }}</span>
+            </div>
+
+            {% if single_product.description %}
+              <p class="text-muted">{{ single_product.description }}</p>
+            {% endif %}
+
+            <hr>
+
+            <!-- Color -->
+            <div class="form-group">
+              <label><b>Choose Color</b></label>
+              <select name="color" class="form-control">
+                <option value="" selected>--</option>
+                {% for v in single_product.variation_set.all %}
+                  {% if v.is_active and v.variation_category == 'color' %}
+                    <option value="{{ v.variation_value|lower }}">{{ v.variation_value|capfirst }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Size -->
+            <div class="form-group">
+              <label><b>Select Size</b></label>
+              <select name="size" class="form-control">
+                <option value="" selected>--</option>
+                {% for v in single_product.variation_set.all %}
+                  {% if v.is_active and v.variation_category == 'size' %}
+                    <option value="{{ v.variation_value|lower }}">{{ v.variation_value|capfirst }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+
+            <hr>
+
+            {% if single_product.stock <= 0 %}
+              <h5 class="text-danger mb-3">Out of stock</h5>
+              <button type="button" class="btn btn-secondary" disabled>Out of Stock</button>
+            {% else %}
+              <p class="text-success mb-2"><b>Stock Available:</b> {{ single_product.stock }}</p>
+              <button type="submit" class="btn btn-primary">
+                <span class="text">Add to cart</span>
+                <i class="fas fa-shopping-cart"></i>
+              </button>
+            {% endif %}
+
+          </form>
+        </main>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

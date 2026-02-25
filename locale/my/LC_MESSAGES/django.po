@@ -1,0 +1,158 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-24 15:22+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: templates/includes/navbar.html:47
+msgid "Email"
+msgstr "အီးမေးလ်"
+
+#: templates/includes/navbar.html:52
+msgid "Call us"
+msgstr "ဖုန်းခေါ်ရန်"
+
+#: templates/includes/navbar.html:77
+msgid "All category"
+msgstr ""
+
+#: templates/includes/navbar.html:82 templates/store/store.html:34
+msgid "All Products"
+msgstr "ကုန်ပစ္စည်းများ"
+
+#: templates/includes/navbar.html:96
+msgid "Store"
+msgstr ""
+
+#: templates/includes/navbar.html:106
+msgid "Search"
+msgstr "ရှာဖွေပါ"
+
+#: templates/includes/navbar.html:124
+msgid "Welcome guest!"
+msgstr "မင်္ဂလာပါ"
+
+#: templates/includes/navbar.html:127
+msgid "Sign in"
+msgstr "အကောင့်ဝင်ပါ"
+
+#: templates/includes/navbar.html:129
+msgid "Register"
+msgstr "အကောင့်ဖေါက်ပါ"
+
+#: templates/includes/navbar.html:135
+#, python-format
+msgid ""
+"\n"
+"                    Welcome %(name)s!\n"
+"                  "
+msgstr ""
+
+#: templates/includes/navbar.html:140
+msgid "Warehouse"
+msgstr ""
+
+#: templates/includes/navbar.html:142
+msgid "Logout"
+msgstr "အကောင့်မှထွက်ရန်"
+
+#: templates/store/store.html:8
+msgid "Search Results"
+msgstr ""
+
+#: templates/store/store.html:10
+msgid "Our Store"
+msgstr "BabyChue လက်လီလက်ကား ရောင်းဝယ်ရေး"
+
+#: templates/store/store.html:27
+msgid "Categories"
+msgstr "အမျိုးအစားများ"
+
+#: templates/store/store.html:48
+msgid "Sizes"
+msgstr ""
+
+#: templates/store/store.html:81 templates/store/store.html:166
+msgid "Apply"
+msgstr ""
+
+#: templates/store/store.html:85 templates/store/store.html:170
+#: templates/store/store.html:229
+msgid "Clear Filters"
+msgstr ""
+
+#: templates/store/store.html:88
+msgid "No sizes available."
+msgstr ""
+
+#: templates/store/store.html:101
+msgid "Price range"
+msgstr "ဈေးနှုန်းများ"
+
+#: templates/store/store.html:113
+#, python-format
+msgid ""
+"\n"
+"                            MMK %(min)s - MMK %(max)s\n"
+"                          "
+msgstr ""
+
+#: templates/store/store.html:121
+msgid "No price data available."
+msgstr ""
+
+#: templates/store/store.html:139
+msgid "Min"
+msgstr ""
+
+#: templates/store/store.html:152
+msgid "Max"
+msgstr ""
+
+#: templates/store/store.html:187
+#, python-format
+msgid ""
+"\n"
+"                  %(counter)s item found\n"
+"                "
+msgid_plural ""
+"\n"
+"                  %(counter)s items found\n"
+"                "
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/store/store.html:213
+#, python-format
+msgid "MMK %(p)s"
+msgstr ""
+
+#: templates/store/store.html:219
+msgid "View details"
+msgstr ""
+
+#: templates/store/store.html:227
+msgid "Sorry, no product found!"
+msgstr ""
+
+#: templates/store/store.html:243 templates/store/store.html:248
+msgid "Previous"
+msgstr ""
+
+#: templates/store/store.html:267 templates/store/store.html:272
+msgid "Next"
+msgstr ""
