@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'django.contrib.humanize', # Add this line
     'admin_honeypot',
-    "qr_code",
+    "qrcode",
     "warehouse",
     "category",
     "accounts",
