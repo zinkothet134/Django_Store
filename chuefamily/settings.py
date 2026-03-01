@@ -26,11 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS",
-    default="localhost,127.0.0.1,.elasticbeanstalk.com",
-    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
-)
+ALLOWED_HOSTS = ["13.212.113.64","127.0.0.1"]
 
 
 # Application definition
